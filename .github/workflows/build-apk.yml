@@ -1,10 +1,17 @@
-name: Build & Release Debug APK
+name: Build & Release Global APK
 
 on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Optional tag name (e.g. v1.2.0). Leave empty for automatic version tag.'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -15,6 +22,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -25,18 +34,11 @@ jobs:
       - name: Verify Java environment
         run: |
           java -version
-          echo "JAVA_HOME=$JAVA_HOME"
           JAVA_MAJOR=$(java -version 2>&1 | head -n 1 | awk -F '"' '{print $2}' | awk -F '.' '{print $1}')
-          if [ -z "$JAVA_MAJOR" ]; then
-            echo "::error::Could not detect Java major version"
+          if [ -z "$JAVA_MAJOR" ] || [ "$JAVA_MAJOR" -lt 17 ]; then
+            echo "::error::Java 17+ required. Detected: $JAVA_MAJOR"
             exit 1
           fi
-          echo "Active Java major version: $JAVA_MAJOR"
-          if [ "$JAVA_MAJOR" -lt 17 ]; then
-            echo "::error::Java version must be 17 or newer. Detected: $JAVA_MAJOR"
-            exit 1
-          fi
-          echo "Java environment verified successfully (version $JAVA_MAJOR >= 17)"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -60,117 +62,184 @@ jobs:
               -validity 10000 \
               -dname "CN=Android Debug,O=Android,C=US"
           fi
-          if [ ! -f "./debug.keystore" ]; then
-            echo "::error::Failed to create ./debug.keystore"
-            exit 1
-          fi
-          echo "Debug keystore is ready."
 
-      - name: Build debug APK
+      - name: Read app metadata
+        id: app_meta
+        run: |
+          VERSION_NAME=$(grep -E 'versionName\s*=' app/build.gradle.kts | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
+          VERSION_CODE=$(grep -E 'versionCode\s*=' app/build.gradle.kts | head -n 1 | sed -E 's/[^0-9]//g')
+          VERSION_NAME=${VERSION_NAME:-1.2.0}
+          VERSION_CODE=${VERSION_CODE:-1}
+
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            RELEASE_TAG="${{ github.ref_name }}"
+          elif [ -n "${{ inputs.release_tag }}" ]; then
+            RELEASE_TAG="${{ inputs.release_tag }}"
+          else
+            RELEASE_TAG="v${VERSION_NAME}-build.${{ github.run_number }}"
+          fi
+
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "Resolved Release Tag: $RELEASE_TAG (v$VERSION_NAME / code $VERSION_CODE)"
+
+      - name: Build universal global APK
         run: gradle :app:assembleDebug --stacktrace --no-daemon
 
-      - name: Verify debug APK
-        run: |
-          TARGET_APK="app/build/outputs/apk/debug/app-debug.apk"
-          if [ -f "$TARGET_APK" ] && [ -s "$TARGET_APK" ]; then
-            echo "Confirmed expected APK exists: $TARGET_APK"
-          else
-            echo "::error::Expected APK not found at $TARGET_APK"
-            echo "Searching only inside app/build/outputs/apk..."
-            if [ -d "app/build/outputs/apk" ]; then
-              find app/build/outputs/apk -name "*.apk"
-            else
-              echo "Directory app/build/outputs/apk does not exist."
-            fi
-            exit 1
-          fi
-
-      - name: Upload debug APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-
-      - name: Prepare APK release asset
+      - name: Verify and package global APK assets
         id: prep_release
         run: |
-          TMP_DIR=$(mktemp -d)
-          cp app/build/outputs/apk/debug/app-debug.apk "$TMP_DIR/app-debug.apk"
-          if [ ! -f "$TMP_DIR/app-debug.apk" ] || [ ! -s "$TMP_DIR/app-debug.apk" ]; then
-            echo "::error::Failed to prepare release asset"
+          SOURCE_APK="app/build/outputs/apk/debug/app-debug.apk"
+          if [ ! -f "$SOURCE_APK" ] || [ ! -s "$SOURCE_APK" ]; then
+            echo "::error::Expected APK not found at $SOURCE_APK"
+            find app/build/outputs -name "*.apk" 2>/dev/null || true
             exit 1
           fi
-          echo "asset_path=$TMP_DIR/app-debug.apk" >> "$GITHUB_OUTPUT"
-          echo "Prepared release asset: $TMP_DIR/app-debug.apk"
 
-      - name: Publish APK to GitHub Releases
+          OUT_DIR=$(mktemp -d)
+          TAG_SAFE=$(echo "${{ steps.app_meta.outputs.release_tag }}" | tr '/ ' '__')
+          GLOBAL_APK="$OUT_DIR/EggDecide-global.apk"
+          VERSIONED_APK="$OUT_DIR/EggDecide-${TAG_SAFE}-universal.apk"
+          COMPAT_APK="$OUT_DIR/app-debug.apk"
+
+          cp "$SOURCE_APK" "$GLOBAL_APK"
+          cp "$SOURCE_APK" "$VERSIONED_APK"
+          cp "$SOURCE_APK" "$COMPAT_APK"
+
+          (cd "$OUT_DIR" && sha256sum "EggDecide-global.apk" > "EggDecide-global.apk.sha256")
+          SHA256_VAL=$(awk '{print $1}' "$OUT_DIR/EggDecide-global.apk.sha256")
+          APK_SIZE=$(du -h "$GLOBAL_APK" | awk '{print $1}')
+
+          echo "out_dir=$OUT_DIR" >> "$GITHUB_OUTPUT"
+          echo "global_apk=$GLOBAL_APK" >> "$GITHUB_OUTPUT"
+          echo "versioned_apk=$VERSIONED_APK" >> "$GITHUB_OUTPUT"
+          echo "compat_apk=$COMPAT_APK" >> "$GITHUB_OUTPUT"
+          echo "checksum_file=$OUT_DIR/EggDecide-global.apk.sha256" >> "$GITHUB_OUTPUT"
+          echo "sha256=$SHA256_VAL" >> "$GITHUB_OUTPUT"
+          echo "apk_size=$APK_SIZE" >> "$GITHUB_OUTPUT"
+          echo "Prepared Global APK ($APK_SIZE, SHA-256: $SHA256_VAL)"
+
+      - name: Upload global APK build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: eggdecide-global-apk
+          path: |
+            ${{ steps.prep_release.outputs.global_apk }}
+            ${{ steps.prep_release.outputs.versioned_apk }}
+            ${{ steps.prep_release.outputs.compat_apk }}
+            ${{ steps.prep_release.outputs.checksum_file }}
+          if-no-files-found: error
+
+      - name: Generate release notes from CHANGELOG.md
+        id: release_notes
+        run: |
+          NOTES_FILE=$(mktemp)
+          {
+            echo "## EggDecide ${{ steps.app_meta.outputs.release_tag }} (Global Universal APK)"
+            echo ""
+            echo "This universal APK supports **all Android devices globally** (\`arm64-v8a\`, \`armeabi-v7a\`, \`x86\`, \`x86_64\`, Android 7.0+ / API 24+)."
+            echo ""
+            echo "### Download Assets"
+            echo "- \`EggDecide-global.apk\` — **Recommended** universal APK (${{ steps.prep_release.outputs.apk_size }})"
+            echo "- \`$(basename "${{ steps.prep_release.outputs.versioned_apk }}")\` — Version-tagged universal APK"
+            echo "- \`app-debug.apk\` — Standard build output alias"
+            echo "- **SHA-256**: \`${{ steps.prep_release.outputs.sha256 }}\`"
+            echo ""
+            if [ -f "CHANGELOG.md" ]; then
+              echo "### Latest Update Logs"
+              awk '/^## \[/{count++} count==1{print} count==2{exit}' CHANGELOG.md
+              echo ""
+            fi
+            echo "### Build Metadata"
+            echo "- **App Version**: \`${{ steps.app_meta.outputs.version_name }}\` (versionCode \`${{ steps.app_meta.outputs.version_code }}\`)"
+            echo "- **Build Run**: #${{ github.run_number }} (Attempt ${{ github.run_attempt }})"
+            echo "- **Source Commit**: \`${{ github.sha }}\`"
+            echo "- **Signing Note**: Signed with CI debug keystore for direct sideloading and testing."
+          } > "$NOTES_FILE"
+          echo "notes_file=$NOTES_FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Publish versioned tag & GitHub Release
         id: create_release
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh --version
-          ASSET_PATH="${{ steps.prep_release.outputs.asset_path }}"
-          if [ ! -f "$ASSET_PATH" ] || [ ! -s "$ASSET_PATH" ]; then
-            echo "::error::Release asset is missing or empty: $ASSET_PATH"
-            exit 1
+          RELEASE_TAG="${{ steps.app_meta.outputs.release_tag }}"
+          RELEASE_TITLE="EggDecide $RELEASE_TAG — Global APK"
+          NOTES_FILE="${{ steps.release_notes.outputs.notes_file }}"
+
+          GLOBAL_APK="${{ steps.prep_release.outputs.global_apk }}"
+          VERSIONED_APK="${{ steps.prep_release.outputs.versioned_apk }}"
+          COMPAT_APK="${{ steps.prep_release.outputs.compat_apk }}"
+          CHECKSUM_FILE="${{ steps.prep_release.outputs.checksum_file }}"
+
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Updating existing release for tag $RELEASE_TAG..."
+            gh release upload "$RELEASE_TAG" \
+              "$GLOBAL_APK" "$VERSIONED_APK" "$COMPAT_APK" "$CHECKSUM_FILE" \
+              --clobber
+            gh release edit "$RELEASE_TAG" \
+              --title "$RELEASE_TITLE" \
+              --notes-file "$NOTES_FILE" \
+              --latest
+          else
+            echo "Creating release and tag $RELEASE_TAG..."
+            gh release create "$RELEASE_TAG" \
+              "$GLOBAL_APK" "$VERSIONED_APK" "$COMPAT_APK" "$CHECKSUM_FILE" \
+              --target "${{ github.sha }}" \
+              --title "$RELEASE_TITLE" \
+              --latest \
+              --notes-file "$NOTES_FILE"
           fi
-          ASSET_NAME=$(basename "$ASSET_PATH")
-          if [ "$ASSET_NAME" != "app-debug.apk" ]; then
-            echo "::error::Asset name must be exactly app-debug.apk, found: $ASSET_NAME"
-            exit 1
+
+      - name: Update rolling 'global' tag & release alias
+        if: steps.create_release.outcome == 'success'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES_FILE="${{ steps.release_notes.outputs.notes_file }}"
+          GLOBAL_APK="${{ steps.prep_release.outputs.global_apk }}"
+          COMPAT_APK="${{ steps.prep_release.outputs.compat_apk }}"
+          CHECKSUM_FILE="${{ steps.prep_release.outputs.checksum_file }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -fa "global" "${{ github.sha }}" -m "Global APK (${{ steps.app_meta.outputs.release_tag }})"
+          git push origin "refs/tags/global" --force
+
+          if gh release view "global" >/dev/null 2>&1; then
+            gh release upload "global" "$GLOBAL_APK" "$COMPAT_APK" "$CHECKSUM_FILE" --clobber
+            gh release edit "global" \
+              --title "EggDecide Global APK (Latest Universal Build)" \
+              --notes-file "$NOTES_FILE" \
+              --latest=false
+          else
+            gh release create "global" "$GLOBAL_APK" "$COMPAT_APK" "$CHECKSUM_FILE" \
+              --target "${{ github.sha }}" \
+              --title "EggDecide Global APK (Latest Universal Build)" \
+              --latest=false \
+              --notes-file "$NOTES_FILE"
           fi
 
-          RELEASE_TAG="debug-apk-build-${{ github.run_number }}-${{ github.run_attempt }}"
-          RELEASE_TITLE="Debug APK Build #${{ github.run_number }}"
-
-          NOTES=$(cat << 'EOF'
-          ### EggDecide Debug APK Build
-
-          - **Build Type**: Automatically generated debug APK
-          - **Built By**: GitHub Actions
-          - **Run Number**: ${{ github.run_number }}
-          - **Run Attempt**: ${{ github.run_attempt }}
-          - **Source Commit**: ${{ github.sha }}
-          - **Testing Notice**: This APK is intended for testing and verification. It is signed with a temporary debug keystore and is not a Play Store production release.
-          EOF
-          )
-
-          echo "Creating release $RELEASE_TAG ($RELEASE_TITLE)..."
-          gh release create "$RELEASE_TAG" "$ASSET_PATH" \
-            --target "${{ github.sha }}" \
-            --title "$RELEASE_TITLE" \
-            --latest \
-            --notes "$NOTES"
-
-      - name: Report APK download result
+      - name: Report Global APK download URLs
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          RELEASE_TAG="debug-apk-build-${{ github.run_number }}-${{ github.run_attempt }}"
+          RELEASE_TAG="${{ steps.app_meta.outputs.release_tag }}"
           if [ "${{ steps.create_release.outcome }}" = "success" ]; then
-            echo "================================================="
-            echo "GitHub Release published successfully!"
-            gh release view "$RELEASE_TAG"
-            echo "Release Tag: $RELEASE_TAG"
-            echo "Release Title: Debug APK Build #${{ github.run_number }}"
-            echo "Release Asset: app-debug.apk"
-            DIRECT_URL="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/app-debug.apk"
-            echo "Direct Download URL: $DIRECT_URL"
-            echo "================================================="
-
+            LATEST_GLOBAL_URL="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/EggDecide-global.apk"
+            TAG_GLOBAL_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/global/EggDecide-global.apk"
             {
-              echo "### 📱 DIRECT APK DOWNLOAD"
+              echo "### 🌍 Global Universal APK Published"
               echo ""
-              echo "Direct APK link: [$DIRECT_URL]($DIRECT_URL)"
-              echo ""
-              echo "> *Note: Backup Actions artifact \`app-debug-apk\` is also preserved in this run.*"
+              echo "- **Latest Release Global APK**: [$LATEST_GLOBAL_URL]($LATEST_GLOBAL_URL)"
+              echo "- **Rolling \`global\` Tag APK**: [$TAG_GLOBAL_URL]($TAG_GLOBAL_URL)"
+              echo "- **Release Tag**: \`$RELEASE_TAG\`"
+              echo "- **SHA-256**: \`${{ steps.prep_release.outputs.sha256 }}\`"
             } >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "::warning::GitHub Release creation step failed or was skipped."
-            if [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
-              echo "The debug APK was successfully built and uploaded as the Actions artifact 'app-debug-apk'."
-            fi
+            echo "::warning::GitHub Release creation failed or was skipped; check workflow permissions."
           fi
