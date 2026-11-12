@@ -27,6 +27,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.compose.ui.viewinterop.AndroidView
@@ -42,7 +46,7 @@ class MainActivity : ComponentActivity() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(ComposeColor(0xFF070913))
+                    .background(ComposeColor(0xFF090B14))
                     .statusBarsPadding()
                     .navigationBarsPadding()
             ) {
@@ -118,11 +122,16 @@ class AndroidAppBridge(private val context: Context) {
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun DecisionAppWebView() {
-    var webViewRef: WebView? = null
+    var webViewRef by remember { mutableStateOf<WebView?>(null) }
 
     BackHandler(enabled = true) {
-        if (webViewRef?.canGoBack() == true) {
-            webViewRef?.goBack()
+        val wv = webViewRef
+        if (wv != null) {
+            wv.evaluateJavascript("window.__eggDecideHandleBack ? window.__eggDecideHandleBack() : false") { result ->
+                if (result != "true" && wv.canGoBack()) {
+                    wv.goBack()
+                }
+            }
         }
     }
 
@@ -134,8 +143,11 @@ fun DecisionAppWebView() {
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
-                setBackgroundColor(Color.parseColor("#070913"))
+                setBackgroundColor(Color.parseColor("#090B14"))
+                setLayerType(View.LAYER_TYPE_HARDWARE, null)
                 overScrollMode = View.OVER_SCROLL_NEVER
+                isHorizontalScrollBarEnabled = false
+                isVerticalScrollBarEnabled = false
 
                 settings.apply {
                     javaScriptEnabled = true
@@ -147,6 +159,9 @@ fun DecisionAppWebView() {
                     useWideViewPort = true
                     cacheMode = WebSettings.LOAD_DEFAULT
                     setSupportZoom(false)
+                    builtInZoomControls = false
+                    displayZoomControls = false
+                    setGeolocationEnabled(false)
                     mediaPlaybackRequiresUserGesture = false
                 }
 
