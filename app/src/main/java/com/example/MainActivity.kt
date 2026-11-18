@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 class MainActivity : ComponentActivity() {
 
@@ -92,16 +96,25 @@ class AndroidAppBridge(private val context: Context) {
         }
     }
 
-    @JavascriptInterface
-    fun triggerHapticFeedback(patternType: String) {
+    private val vibrator: Vibrator? by lazy {
         try {
-            val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
                 vm?.defaultVibrator
             } else {
                 @Suppress("DEPRECATION")
                 context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
             }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    @JavascriptInterface
+    fun triggerHapticFeedback(patternType: String) {
+        try {
+            val v = vibrator ?: return
+            if (!v.hasVibrator()) return
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val effect = when (patternType) {
@@ -110,10 +123,10 @@ class AndroidAppBridge(private val context: Context) {
                     "reward" -> VibrationEffect.createWaveform(longArrayOf(0, 30, 50, 70), -1)
                     else -> VibrationEffect.createOneShot(20, VibrationEffect.DEFAULT_AMPLITUDE)
                 }
-                vibrator?.vibrate(effect)
+                v.vibrate(effect)
             } else {
                 @Suppress("DEPRECATION")
-                vibrator?.vibrate(30)
+                v.vibrate(30)
             }
         } catch (_: Exception) {}
     }
@@ -123,6 +136,36 @@ class AndroidAppBridge(private val context: Context) {
 @Composable
 fun DecisionAppWebView() {
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            val wv = webViewRef ?: return@LifecycleEventObserver
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> {
+                    wv.evaluateJavascript("window.__eggDecideOnPause && window.__eggDecideOnPause()", null)
+                    wv.onPause()
+                    wv.pauseTimers()
+                }
+                Lifecycle.Event.ON_RESUME -> {
+                    wv.onResume()
+                    wv.resumeTimers()
+                    wv.evaluateJavascript("window.__eggDecideOnResume && window.__eggDecideOnResume()", null)
+                }
+                else -> {}
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            val wv = webViewRef
+            webViewRef = null
+            if (wv != null) {
+                wv.stopLoading()
+                wv.destroy()
+            }
+        }
+    }
 
     BackHandler(enabled = true) {
         val wv = webViewRef
@@ -144,7 +187,6 @@ fun DecisionAppWebView() {
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 setBackgroundColor(Color.parseColor("#090B14"))
-                setLayerType(View.LAYER_TYPE_HARDWARE, null)
                 overScrollMode = View.OVER_SCROLL_NEVER
                 isHorizontalScrollBarEnabled = false
                 isVerticalScrollBarEnabled = false
@@ -165,7 +207,7 @@ fun DecisionAppWebView() {
                     mediaPlaybackRequiresUserGesture = false
                 }
 
-                addJavascriptInterface(AndroidAppBridge(context), "AndroidBridge")
+                addJavascriptInterface(AndroidAppBridge(context.applicationContext), "AndroidBridge")
 
                 webViewClient = WebViewClient()
                 webChromeClient = WebChromeClient()

@@ -285,42 +285,36 @@
       100% { transform: translate3d(-55px, -30px, 0) scale(1.12); }
     }
 
-    /* Stage Glow behind Egg & Scratch Card */
+    /* Stage Glow behind Egg & Scratch Card (Zero-Filter Multi-Stop Feather) */
     .stage-aura {
       position: absolute;
-      width: 260px;
-      height: 260px;
+      width: 280px;
+      height: 280px;
       border-radius: 50%;
-      background: radial-gradient(circle, var(--theme-glow) 0%, transparent 68%);
+      background: radial-gradient(
+        circle,
+        var(--theme-glow) 0%,
+        color-mix(in srgb, var(--theme-glow) 45%, transparent) 42%,
+        transparent 72%
+      );
       pointer-events: none;
       z-index: 0;
-      filter: blur(8px);
-      animation: stageAuraPulse 3.6s ease-in-out infinite alternate;
-    }
-    @keyframes stageAuraPulse {
-      0% { transform: scale(0.94); opacity: 0.68; }
-      100% { transform: scale(1.08); opacity: 1; }
+      opacity: 0.9;
     }
 
-    /* Frosted Glass Card Components */
+    /* Frosted Glass Card Components (Zero-Blur Specular Surface) */
     .m3-card {
       background: var(--theme-surface);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
       border: 1px solid var(--theme-border);
       border-radius: 24px;
-      box-shadow: var(--theme-card-shadow);
-      transform: translateZ(0);
-      transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+      box-shadow: var(--theme-card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: background-color 0.25s, border-color 0.25s, box-shadow 0.25s;
     }
     .m3-card-subtle {
       background: var(--theme-surface-low);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--theme-border-subtle);
       border-radius: 18px;
-      transform: translateZ(0);
-      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.25s;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s;
     }
 
     /* M3 Expressive Buttons with Bouncy Spring Micro-Animations */
@@ -358,9 +352,8 @@
       justify-content: center;
       gap: 6px;
       cursor: pointer;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s;
     }
     .m3-btn-tonal:active {
       transform: scale(0.92);
@@ -378,9 +371,8 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s;
     }
     .m3-btn-icon:active {
       transform: scale(0.88) rotate(-4deg);
@@ -401,9 +393,7 @@
       align-items: center;
       gap: 6px;
       cursor: pointer;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s, border-color 0.2s, color 0.2s;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s, border-color 0.2s, color 0.2s;
     }
     .m3-chip:active {
       transform: scale(0.91);
@@ -430,11 +420,9 @@
       margin-top: 14px;
       padding: 12px 14px;
       background: var(--theme-surface);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
       border: 1px solid var(--theme-border);
       border-radius: 20px;
-      box-shadow: var(--theme-card-shadow);
+      box-shadow: var(--theme-card-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
     .mood-suggest-btn {
       flex: 1;
@@ -624,11 +612,11 @@
       transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
     }
 
-    /* Style 1: Liquid Glass Navigation (GPU-optimized blur) */
+    /* Style 1: Liquid Glass Navigation (GPU-optimized lightweight blur) */
     .nav-style-liquid-glass {
       background: var(--theme-glass-nav);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--theme-border);
     }
 
@@ -641,8 +629,6 @@
     /* Style 3: Floating Transparent */
     .nav-style-transparent {
       background: transparent;
-      backdrop-filter: blur(2px);
-      -webkit-backdrop-filter: blur(2px);
       border: 1px solid var(--theme-border);
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     }
@@ -838,13 +824,12 @@
       transform: scale(0) translateZ(0);
       opacity: 0;
       pointer-events: none;
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.28s ease;
       z-index: 0;
     }
     .mascot-reveal-box.peeking {
       transform: scale(0.66) translateY(-2px) translateZ(0) !important;
       opacity: 0.95 !important;
-      filter: drop-shadow(0 0 12px var(--theme-primary));
     }
     .mascot-reveal-box.peeking #mascotLabelText {
       display: none;
@@ -908,7 +893,7 @@
       will-change: transform;
     }
 
-    /* Modal Bottom Sheets (Frosted Glass) */
+    /* Modal Bottom Sheets */
     .m3-modal-scrim {
       position: fixed;
       inset: 0;
@@ -917,12 +902,10 @@
       align-items: flex-end;
       justify-content: center;
       background: var(--theme-scrim);
-      backdrop-filter: blur(3px);
-      -webkit-backdrop-filter: blur(3px);
     }
     .m3-modal-scrim.open {
       display: flex;
-      animation: scrimFade 0.2s ease-out forwards;
+      animation: scrimFade 0.18s ease-out forwards;
     }
     @keyframes scrimFade {
       from { opacity: 0; }
@@ -932,14 +915,14 @@
       width: 100%;
       max-width: 480px;
       background: var(--theme-surface-high);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-radius: 28px 28px 0 0;
       border-top: 1px solid var(--theme-border);
       padding: 20px 24px calc(env(safe-area-inset-bottom, 16px) + 20px) 24px;
       box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.38);
       transform: translateY(100%);
-      animation: sheetSlideUp 0.28s cubic-bezier(0.2, 0, 0, 1) forwards;
+      animation: sheetSlideUp 0.24s cubic-bezier(0.2, 0, 0, 1) forwards;
       max-height: 85vh;
       overflow-y: auto;
     }
@@ -947,12 +930,13 @@
       to { transform: translateY(0); }
     }
 
-    /* Particle Canvas */
+    /* Particle Canvas (Hidden when idle to save compositor pass) */
     #confettiCanvas {
       position: fixed;
       inset: 0;
       pointer-events: none;
       z-index: 999;
+      display: none;
     }
 
     /* Circular Settings Toggle (Theme Primary when enabled, Background Color when disabled) */
@@ -1009,21 +993,14 @@
       68% { opacity: 1; transform: translateY(-3px) scale(1.015); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
-    @keyframes shopIconFloat {
-      0% { transform: translateY(0) scale(1); }
-      100% { transform: translateY(-3px) scale(1.05); }
-    }
     #shopModalScrim.open .m3-modal-sheet {
-      animation: shopSheetEnter 0.44s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation: shopSheetEnter 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
     #shopModalScrim.shop-entering .shop-header-row {
-      animation: shopHeaderSlide 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: shopHeaderSlide 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
     #shopModalScrim.shop-entering .shop-item-card {
-      animation: shopCardPopIn 0.44s cubic-bezier(0.22, 1.32, 0.36, 1) both;
-    }
-    #shopModalScrim.open .shop-preview-thumb {
-      animation: shopIconFloat 2.2s ease-in-out infinite alternate;
+      animation: shopCardPopIn 0.38s cubic-bezier(0.22, 1.32, 0.36, 1) both;
     }
 
     /* Alert Dot on Quests Icon */
@@ -1082,7 +1059,6 @@
       left: 50%;
       transform: translateX(-50%);
       display: none;
-      filter: drop-shadow(0 2px 6px rgba(251, 191, 36, 0.7));
     }
     .sanctuary-pet-avatar.tier-mythic .sanctuary-pet-crown {
       display: block;
@@ -1207,8 +1183,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
     }
     .mystery-box-icon {
       width: 54px;
@@ -1249,6 +1224,15 @@
       border-color: #fbbf24;
       color: var(--theme-gold-text);
       box-shadow: 0 2px 12px rgba(251, 191, 36, 0.24);
+    }
+
+    /* Power-Saving Animation Pause Rules (Backgrounded, Off-Tab, or Under Modals) */
+    body.app-paused *,
+    body.modal-open .ambient-orb,
+    body.modal-open .ambient-orb-2,
+    body.modal-open .egg-hull.idle,
+    #viewEgg:not(.active) .egg-hull.idle {
+      animation-play-state: paused !important;
     }
   </style>
 </head>
@@ -2451,8 +2435,30 @@
 
       loadState();
 
-      /* --- AUDIO SYNTHESIZER (Safe, Non-Blocking) --- */
+      /* --- AUDIO SYNTHESIZER (Auto-Suspend Power Saver & Cached Buffers) --- */
       let audioCtx = null;
+      let audioSuspendTimer = null;
+
+      function cancelAudioSuspend() {
+        if (audioSuspendTimer) {
+          clearTimeout(audioSuspendTimer);
+          audioSuspendTimer = null;
+        }
+      }
+
+      function scheduleAudioSuspend(delayMs) {
+        cancelAudioSuspend();
+        audioSuspendTimer = setTimeout(() => {
+          audioSuspendTimer = null;
+          try {
+            if (audioCtx && audioCtx.state === 'running' && AmbientSoundPlayer.currentMode === 'off') {
+              const p = audioCtx.suspend();
+              if (p && typeof p.catch === 'function') p.catch(() => {});
+            }
+          } catch (_) {}
+        }, typeof delayMs === 'number' ? delayMs : 2500);
+      }
+
       function getAudioContext() {
         try {
           if (!audioCtx) {
@@ -2470,144 +2476,177 @@
       }
 
       const SoundFX = {
+        _scratchBuffer: null,
+        _scratchSampleRate: 0,
+
         playImpact(stage) {
           if (!state.soundEnabled) return;
           try {
-          const ctx = getAudioContext();
-          if (!ctx) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            if (AmbientSoundPlayer.currentMode === 'off') scheduleAudioSuspend(2500);
 
-          // 1. Organic body impact
-          const osc1 = ctx.createOscillator();
-          const gain1 = ctx.createGain();
-          const base = 85 + stage * 30;
-          osc1.type = 'sine';
-          osc1.frequency.setValueAtTime(base, ctx.currentTime);
-          osc1.frequency.exponentialRampToValueAtTime(28, ctx.currentTime + 0.14);
-          gain1.gain.setValueAtTime(0.4, ctx.currentTime);
-          gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.14);
-          osc1.connect(gain1);
-          gain1.connect(ctx.destination);
-          osc1.start();
-          osc1.stop(ctx.currentTime + 0.14);
+            // 1. Organic body impact
+            const osc1 = ctx.createOscillator();
+            const gain1 = ctx.createGain();
+            const base = 85 + stage * 30;
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(base, ctx.currentTime);
+            osc1.frequency.exponentialRampToValueAtTime(28, ctx.currentTime + 0.14);
+            gain1.gain.setValueAtTime(0.4, ctx.currentTime);
+            gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.14);
+            osc1.connect(gain1);
+            gain1.connect(ctx.destination);
+            osc1.start();
+            osc1.stop(ctx.currentTime + 0.14);
 
-          // 2. Realistic ceramic snap click
-          const osc2 = ctx.createOscillator();
-          const gain2 = ctx.createGain();
-          osc2.type = 'triangle';
-          osc2.frequency.setValueAtTime(1200 + stage * 350, ctx.currentTime);
-          osc2.frequency.exponentialRampToValueAtTime(250, ctx.currentTime + 0.04);
-          gain2.gain.setValueAtTime(0.25, ctx.currentTime);
-          gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
-          osc2.connect(gain2);
-          gain2.connect(ctx.destination);
-          osc2.start();
-          osc2.stop(ctx.currentTime + 0.04);
+            // 2. Realistic ceramic snap click
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(1200 + stage * 350, ctx.currentTime);
+            osc2.frequency.exponentialRampToValueAtTime(250, ctx.currentTime + 0.04);
+            gain2.gain.setValueAtTime(0.25, ctx.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.start();
+            osc2.stop(ctx.currentTime + 0.04);
           } catch (e) {}
         },
 
         playHatch() {
           if (!state.soundEnabled) return;
           try {
-          const ctx = getAudioContext();
-          if (!ctx) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            if (AmbientSoundPlayer.currentMode === 'off') scheduleAudioSuspend(2500);
 
-          const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
-          notes.forEach((freq, i) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.06);
-            gain.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.06);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.06 + 0.45);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(ctx.currentTime + i * 0.06);
-            osc.stop(ctx.currentTime + i * 0.06 + 0.5);
-          });
+            const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+            notes.forEach((freq, i) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.06);
+              gain.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.06);
+              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.06 + 0.45);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(ctx.currentTime + i * 0.06);
+              osc.stop(ctx.currentTime + i * 0.06 + 0.5);
+            });
           } catch (e) {}
         },
 
         playScratch() {
           if (!state.soundEnabled) return;
           try {
-          const ctx = getAudioContext();
-          if (!ctx) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            if (AmbientSoundPlayer.currentMode === 'off') scheduleAudioSuspend(2500);
 
-          const bufferSize = Math.max(1, Math.floor(ctx.sampleRate * 0.035));
-          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-          const data = buffer.getChannelData(0);
-          for (let i = 0; i < bufferSize; i++) {
-            data[i] = (Math.random() * 2 - 1) * 0.18;
-          }
-          const noise = ctx.createBufferSource();
-          noise.buffer = buffer;
-          const filter = ctx.createBiquadFilter();
-          filter.type = 'bandpass';
-          filter.frequency.setValueAtTime(2000 + Math.random() * 400, ctx.currentTime);
-          filter.Q.setValueAtTime(4, ctx.currentTime);
-          const gain = ctx.createGain();
-          gain.gain.setValueAtTime(0.18, ctx.currentTime);
-          noise.connect(filter);
-          filter.connect(gain);
-          gain.connect(ctx.destination);
-          noise.start();
+            if (!this._scratchBuffer || this._scratchSampleRate !== ctx.sampleRate) {
+              const bufferSize = Math.max(1, Math.floor(ctx.sampleRate * 0.04));
+              const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+              const data = buffer.getChannelData(0);
+              for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * 0.18;
+              }
+              this._scratchBuffer = buffer;
+              this._scratchSampleRate = ctx.sampleRate;
+            }
+            const noise = ctx.createBufferSource();
+            noise.buffer = this._scratchBuffer;
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(2000 + Math.random() * 400, ctx.currentTime);
+            filter.Q.setValueAtTime(4, ctx.currentTime);
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.18, ctx.currentTime);
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            noise.start();
           } catch (e) {}
         },
 
         playCoinReward() {
           if (!state.soundEnabled) return;
           try {
-          const ctx = getAudioContext();
-          if (!ctx) return;
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            if (AmbientSoundPlayer.currentMode === 'off') scheduleAudioSuspend(2500);
 
-          // Two-tone bright chime
-          [987.77, 1318.51].forEach((freq, idx) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.09);
-            gain.gain.setValueAtTime(0.28, ctx.currentTime + idx * 0.09);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.09 + 0.4);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(ctx.currentTime + idx * 0.09);
-            osc.stop(ctx.currentTime + idx * 0.09 + 0.45);
-          });
+            [987.77, 1318.51].forEach((freq, idx) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.09);
+              gain.gain.setValueAtTime(0.28, ctx.currentTime + idx * 0.09);
+              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.09 + 0.4);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(ctx.currentTime + idx * 0.09);
+              osc.stop(ctx.currentTime + idx * 0.09 + 0.45);
+            });
           } catch (e) {}
         },
 
         playTick() {
           if (!state.soundEnabled) return;
           try {
-          const ctx = getAudioContext();
-          if (!ctx) return;
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(1000, ctx.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.03);
-          gain.gain.setValueAtTime(0.1, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.start();
-          osc.stop(ctx.currentTime + 0.03);
+            const ctx = getAudioContext();
+            if (!ctx) return;
+            if (AmbientSoundPlayer.currentMode === 'off') scheduleAudioSuspend(2500);
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1000, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.03);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.03);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.03);
           } catch (e) {}
         }
       };
 
-      /* --- OFFLINE AMBIENT FOCUS SOUND PLAYER (Web Audio API) --- */
+      /* --- OFFLINE AMBIENT FOCUS SOUND PLAYER (Web Audio API with Cached Buffers) --- */
       const AmbientSoundPlayer = {
         activeNodes: [],
         masterGain: null,
         emberTimer: null,
+        stopCleanupTimer: null,
         currentMode: 'off',
+        _bufferCache: {},
+
+        _getNoiseBuffer(ctx, mode) {
+          const key = `${mode}_${ctx.sampleRate}`;
+          if (this._bufferCache[key]) return this._bufferCache[key];
+          const bufferSize = ctx.sampleRate * 2;
+          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          let lastOut = 0;
+          for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            lastOut = (lastOut + 0.04 * white) / 1.04;
+            data[i] = mode === 'fire' ? lastOut * 2.8 : (white * 0.25 + lastOut * 1.4);
+          }
+          this._bufferCache[key] = buffer;
+          return buffer;
+        },
 
         stop() {
           this.currentMode = 'off';
           if (this.emberTimer) {
             clearInterval(this.emberTimer);
             this.emberTimer = null;
+          }
+          if (this.stopCleanupTimer) {
+            clearTimeout(this.stopCleanupTimer);
+            this.stopCleanupTimer = null;
           }
           try {
             const ctx = audioCtx;
@@ -2616,11 +2655,13 @@
             }
             const nodes = this.activeNodes.slice();
             this.activeNodes = [];
-            setTimeout(() => {
+            this.stopCleanupTimer = setTimeout(() => {
+              this.stopCleanupTimer = null;
               nodes.forEach(n => {
                 try { if (typeof n.stop === 'function') n.stop(); } catch (_) {}
                 try { if (typeof n.disconnect === 'function') n.disconnect(); } catch (_) {}
               });
+              if (this.currentMode === 'off') scheduleAudioSuspend(300);
             }, 140);
           } catch (_) {
             this.activeNodes = [];
@@ -2644,6 +2685,7 @@
             this.currentMode = 'off';
             return;
           }
+          cancelAudioSuspend();
           try {
             const ctx = getAudioContext();
             if (!ctx) return;
@@ -2657,15 +2699,7 @@
             this.activeNodes.push(master);
 
             if (mode === 'rain' || mode === 'fire') {
-              const bufferSize = ctx.sampleRate * 2;
-              const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-              const data = buffer.getChannelData(0);
-              let lastOut = 0;
-              for (let i = 0; i < bufferSize; i++) {
-                const white = Math.random() * 2 - 1;
-                lastOut = (lastOut + 0.04 * white) / 1.04;
-                data[i] = mode === 'fire' ? lastOut * 2.8 : (white * 0.25 + lastOut * 1.4);
-              }
+              const buffer = this._getNoiseBuffer(ctx, mode);
               const src = ctx.createBufferSource();
               src.buffer = buffer;
               src.loop = true;
@@ -2682,7 +2716,7 @@
 
               if (mode === 'fire') {
                 this.emberTimer = setInterval(() => {
-                  if (this.currentMode !== 'fire' || !state.soundEnabled || !this.masterGain) return;
+                  if (this.currentMode !== 'fire' || !state.soundEnabled || !this.masterGain || document.hidden) return;
                   try {
                     const osc = ctx.createOscillator();
                     const g = ctx.createGain();
@@ -2721,6 +2755,15 @@
         }
       };
 
+      function escapeHtml(str) {
+        return String(str == null ? '' : str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
       function triggerHaptic(pattern) {
         if (window.AndroidBridge && typeof window.AndroidBridge.triggerHapticFeedback === 'function') {
           let type = 'light';
@@ -2736,10 +2779,10 @@
         }
       }
 
-      /* --- RECYCLABLE LIGHTWEIGHT PARTICLE SYSTEM --- */
+      /* --- RECYCLABLE LIGHTWEIGHT PARTICLE SYSTEM (Auto-Hidden When Idle) --- */
       const confettiCanvas = document.getElementById('confettiCanvas');
       const confettiCtx = confettiCanvas.getContext('2d');
-      const MAX_PARTICLES = 40;
+      const MAX_PARTICLES = 36;
       const particlePool = [];
       let particleAnimId = null;
 
@@ -2758,7 +2801,9 @@
       }
 
       function spawnConfetti(originX, originY, customColors) {
+        if (document.hidden) return;
         const colors = customColors || ['#38bdf8', '#c084fc', '#fbbf24', '#ffffff', '#34d399'];
+        confettiCanvas.style.display = 'block';
         for (let i = 0; i < MAX_PARTICLES; i++) {
           const p = particlePool[i];
           const angle = Math.random() * Math.PI * 2;
@@ -2774,10 +2819,17 @@
           p.opacity = 1;
           p.active = true;
         }
-        if (!particleAnimId) renderParticles();
+        if (!particleAnimId) particleAnimId = requestAnimationFrame(renderParticles);
       }
 
       function renderParticles() {
+        if (document.hidden) {
+          for (let i = 0; i < MAX_PARTICLES; i++) particlePool[i].active = false;
+          confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+          confettiCanvas.style.display = 'none';
+          particleAnimId = null;
+          return;
+        }
         confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
         let alive = 0;
         for (let i = 0; i < MAX_PARTICLES; i++) {
@@ -2788,7 +2840,7 @@
           p.y += p.vy;
           p.vy += 0.22;
           p.rot += p.rotSpeed;
-          p.opacity -= 0.024;
+          p.opacity -= 0.025;
 
           if (p.opacity <= 0) {
             p.active = false;
@@ -2808,6 +2860,7 @@
         if (alive > 0) {
           particleAnimId = requestAnimationFrame(renderParticles);
         } else {
+          confettiCanvas.style.display = 'none';
           particleAnimId = null;
         }
       }
@@ -3325,9 +3378,9 @@
       const quickHatchAction = document.getElementById('quickHatchAction');
       const resetEggAction = document.getElementById('resetEggAction');
 
-      // Scratch Mode Elements
+      // Scratch Mode Elements (GPU-Accelerated 2D Context — coverage tracked by O(1) grid)
       const scratchCanvas = document.getElementById('scratchCanvas');
-      const scratchCtx = scratchCanvas.getContext('2d', { alpha: true, willReadFrequently: true });
+      const scratchCtx = scratchCanvas.getContext('2d', { alpha: true, desynchronized: true }) || scratchCanvas.getContext('2d', { alpha: true });
       const scratchResultText = document.getElementById('scratchResultText');
       const scratchResultCategory = document.getElementById('scratchResultCategory');
       const scratchRewardBadge = document.getElementById('scratchRewardBadge');
@@ -3534,6 +3587,12 @@
         if (tab !== 'activeTask') {
           AmbientSoundPlayer.stop();
         }
+        if (tab !== 'egg') {
+          cancelHatchTimers();
+        }
+        if (tab !== 'scratch') {
+          cancelScratchTimer();
+        }
         navItems.forEach(i => i.classList.remove('active'));
         const targetBtn = document.querySelector(`.nav-item[data-tab="${tab}"]`);
         if (targetBtn) targetBtn.classList.add('active');
@@ -3570,8 +3629,16 @@
       let eggTaps = 0;
       const MAX_TAPS = 3;
       let isHatchingLocked = false;
+      let hatchSeqTimer1 = null;
+      let hatchSeqTimer2 = null;
+
+      function cancelHatchTimers() {
+        if (hatchSeqTimer1) { clearTimeout(hatchSeqTimer1); hatchSeqTimer1 = null; }
+        if (hatchSeqTimer2) { clearTimeout(hatchSeqTimer2); hatchSeqTimer2 = null; }
+      }
 
       function resetEgg() {
+        cancelHatchTimers();
         eggTaps = 0;
         isHatchingLocked = false;
         eggTouchTarget.classList.remove('hatched');
@@ -3623,6 +3690,7 @@
 
       function executeHatchSequence() {
         if (isHatchingLocked) return;
+        cancelHatchTimers();
         isHatchingLocked = true;
         hatchStatusText.textContent = 'BURSTING!';
 
@@ -3634,7 +3702,8 @@
         SoundFX.playImpact(3);
         triggerHaptic([40, 20, 80]);
 
-        setTimeout(() => {
+        hatchSeqTimer1 = setTimeout(() => {
+          hatchSeqTimer1 = null;
           svg.classList.remove('stage-1', 'stage-2', 'stage-3');
           eggTouchTarget.classList.add('hatched');
           eggHull.classList.add('bursting');
@@ -3655,8 +3724,11 @@
           saveState();
           evaluateBadges();
 
-          setTimeout(() => {
-            presentDecisionModal(decision);
+          hatchSeqTimer2 = setTimeout(() => {
+            hatchSeqTimer2 = null;
+            if (viewScreens.egg.classList.contains('active') && eggTouchTarget.classList.contains('hatched')) {
+              presentDecisionModal(decision);
+            }
           }, 850);
         }, 420);
       }
@@ -3677,6 +3749,14 @@
       let currentCardDecision = null;
       let scratchAudioThrottle = null;
       let lastScratchPoint = null;
+      let scratchRevealTimer = null;
+
+      function cancelScratchTimer() {
+        if (scratchRevealTimer) {
+          clearTimeout(scratchRevealTimer);
+          scratchRevealTimer = null;
+        }
+      }
 
       const GRID_COLS = 20;
       const GRID_ROWS = 20;
@@ -3684,6 +3764,7 @@
       let clearedCellCount = 0;
 
       function setupScratchCard() {
+        cancelScratchTimer();
         cardRevealed = false;
         isScratchingCard = false;
         activePointerId = null;
@@ -3866,8 +3947,12 @@
           state.stats.totalScratches = (state.stats.totalScratches || 0) + 1;
           saveState();
           evaluateBadges();
-          setTimeout(() => {
-            presentDecisionModal(currentCardDecision);
+          cancelScratchTimer();
+          scratchRevealTimer = setTimeout(() => {
+            scratchRevealTimer = null;
+            if (viewScreens.scratch.classList.contains('active') && cardRevealed) {
+              presentDecisionModal(currentCardDecision);
+            }
           }, 650);
         }
       }
@@ -3965,11 +4050,35 @@
         triggerHaptic([15]);
       });
 
-      /* --- ACTIVE TASK SCREEN WITH TIMER & SAME-DAY REMINDER --- */
+      /* --- ACTIVE TASK SCREEN WITH TIMER & SAME-DAY REMINDER (Wall-Clock Accurate) --- */
       let timerInterval = null;
       let timerSeconds = 0;
+      let timerAccumulatedMs = 0;
+      let timerSegmentStartMs = 0;
+      let focus60ToastShown = false;
       let isTimerRunning = false;
       let activeCurrentTaskData = null;
+
+      let activeReminderTimerId = null;
+      let activeReminderTargetMs = 0;
+      let activeReminderTaskText = '';
+
+      function getElapsedTimerSeconds() {
+        const runningMs = (isTimerRunning && timerSegmentStartMs) ? Math.max(0, Date.now() - timerSegmentStartMs) : 0;
+        return Math.floor((timerAccumulatedMs + runningMs) / 1000);
+      }
+
+      function tickFocusTimer() {
+        const nextSecs = getElapsedTimerSeconds();
+        if (nextSecs !== timerSeconds) {
+          timerSeconds = nextSecs;
+          updateTimerDisplay();
+        }
+        if (timerSeconds >= 60 && !focus60ToastShown) {
+          focus60ToastShown = true;
+          showToast('60s focus reached! Finish & tap Complete to count it.');
+        }
+      }
 
       function launchActiveTaskScreen(decision) {
         activeCurrentTaskData = decision;
@@ -3983,9 +4092,12 @@
         }
         activeTaskCoinRewardBadge.textContent = `+${formatCoinNumber(decision.coins || 20)} Coins`;
 
-        // Reset timer
+        // Reset timer cleanly
         stopTimer();
+        timerAccumulatedMs = 0;
+        timerSegmentStartMs = 0;
         timerSeconds = 0;
+        focus60ToastShown = false;
         updateTimerDisplay();
         syncAmbientSoundUI();
 
@@ -4002,7 +4114,9 @@
       }
 
       function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
         isTimerRunning = true;
+        timerSegmentStartMs = Date.now();
         timerPlayIcon.style.display = 'none';
         timerPauseIcon.style.display = 'block';
         timerToggleText.textContent = 'Pause';
@@ -4010,16 +4124,16 @@
           AmbientSoundPlayer.start(state.ambientPreset);
           syncAmbientSoundUI();
         }
-        timerInterval = setInterval(() => {
-          timerSeconds++;
-          updateTimerDisplay();
-          if (timerSeconds === 60) {
-            showToast('60s focus reached! Finish & tap Complete to count it.');
-          }
-        }, 1000);
+        timerInterval = setInterval(tickFocusTimer, 1000);
       }
 
       function stopTimer() {
+        if (isTimerRunning && timerSegmentStartMs) {
+          timerAccumulatedMs += Math.max(0, Date.now() - timerSegmentStartMs);
+        }
+        timerSegmentStartMs = 0;
+        timerSeconds = Math.floor(timerAccumulatedMs / 1000);
+        updateTimerDisplay();
         isTimerRunning = false;
         timerPlayIcon.style.display = 'block';
         timerPauseIcon.style.display = 'none';
@@ -4043,7 +4157,10 @@
 
       resetTimerBtn.addEventListener('click', () => {
         stopTimer();
+        timerAccumulatedMs = 0;
+        timerSegmentStartMs = 0;
         timerSeconds = 0;
+        focus60ToastShown = false;
         updateTimerDisplay();
         SoundFX.playTick();
       });
@@ -4153,14 +4270,39 @@
       });
 
       /* --- SAME-DAY REMINDER PICKER LOGIC --- */
+      function fireDueReminder() {
+        if (!activeReminderTargetMs) return;
+        const snapshot = activeReminderTaskText || 'your activity';
+        if (activeReminderTimerId) {
+          clearTimeout(activeReminderTimerId);
+          activeReminderTimerId = null;
+        }
+        activeReminderTargetMs = 0;
+        activeReminderTaskText = '';
+        if (reminderBtnText) reminderBtnText.textContent = 'Remember Me (Set Time Today)';
+        triggerHaptic([100, 50, 100, 50, 200]);
+        SoundFX.playHatch();
+        showDialog({
+          title: 'Activity Reminder',
+          message: `Time to do "${snapshot}"!`,
+          mode: 'alert',
+          confirmText: 'Got It'
+        });
+      }
+
       function openReminderPicker() {
         const now = new Date();
         const curHours = now.getHours();
         const curMins = now.getMinutes();
 
-        // Target min time is curMins + 1
+        if (curHours === 23 && curMins >= 59) {
+          showToast('Last minute of today! Reminders reset after midnight.');
+          return;
+        }
+
+        // Target min time is curMins + 1 (same calendar day up to 23:59)
         const minMins = curMins + 1;
-        const targetH = minMins >= 60 ? (curHours + 1) % 24 : curHours;
+        const targetH = minMins >= 60 ? Math.min(23, curHours + 1) : curHours;
         const targetM = minMins >= 60 ? 0 : minMins;
 
         const padH = String(targetH).padStart(2, '0');
@@ -4168,6 +4310,7 @@
         const minTimeString = `${padH}:${padM}`;
 
         reminderTimeInput.min = minTimeString;
+        reminderTimeInput.max = '23:59';
         reminderTimeInput.value = minTimeString;
         reminderFeedbackText.textContent = `Today only: Allowed from ${minTimeString} up to 23:59.`;
 
@@ -4197,7 +4340,7 @@
           return;
         }
 
-        const remainingMins = Math.round(diffMs / 60000);
+        const remainingMins = Math.max(1, Math.round(diffMs / 60000));
         const hrs = Math.floor(remainingMins / 60);
         const mins = remainingMins % 60;
         const timeFormatted = `${hrs > 0 ? hrs + 'h ' : ''}${mins}m`;
@@ -4207,18 +4350,13 @@
         SoundFX.playCoinReward();
         showToast(`Reminder set for ${val} today`);
 
-        const taskTitleSnapshot = activeCurrentTaskData ? activeCurrentTaskData.text : 'your activity';
-        // Schedule in-app timeout reminder
-        setTimeout(() => {
-          triggerHaptic([100, 50, 100, 50, 200]);
-          SoundFX.playHatch();
-          showDialog({
-            title: 'Activity Reminder',
-            message: `Time to do "${taskTitleSnapshot}"!`,
-            mode: 'alert',
-            confirmText: 'Got It'
-          });
-        }, diffMs);
+        if (activeReminderTimerId) {
+          clearTimeout(activeReminderTimerId);
+          activeReminderTimerId = null;
+        }
+        activeReminderTaskText = activeCurrentTaskData ? activeCurrentTaskData.text : 'your activity';
+        activeReminderTargetMs = chosenTime.getTime();
+        activeReminderTimerId = setTimeout(fireDueReminder, diffMs);
       });
 
       /* --- SHOP LOGIC (Egg Skins, Companion Birds & Visual Previews) --- */
@@ -4867,16 +5005,16 @@
           row.innerHTML = `
             <div style="flex: 1; min-width: 0;">
               <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-                <span class="m3-chip" style="font-size: 10px; padding: 2px 6px;">${item.category}</span>
+                <span class="m3-chip" style="font-size: 10px; padding: 2px 6px;">${escapeHtml(item.category)}</span>
                 ${isDone ? '<span style="font-size: 10px; font-weight: 700; color: var(--theme-green-text);">COMPLETED ✓</span>' : ''}
               </div>
-              <p style="font-size: 13px; font-weight: 700; color: var(--theme-text); line-height: 1.3; margin-bottom: 4px; word-break: break-word;">${item.text}</p>
+              <p style="font-size: 13px; font-weight: 700; color: var(--theme-text); line-height: 1.3; margin-bottom: 4px; word-break: break-word;">${escapeHtml(item.text)}</p>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 11px; color: var(--theme-gold-text);">🪙 +${formatCoinNumber(item.coins || 15)} Coins</span>
-                <span style="font-size: 11px; color: var(--theme-text-muted);">${formatTimestamp(item.timestamp)}</span>
+                <span style="font-size: 11px; color: var(--theme-text-muted);">${escapeHtml(formatTimestamp(item.timestamp))}</span>
               </div>
             </div>
-            <button class="delete-history-btn" data-id="${item.id}" style="background: none; border: none; color: var(--theme-text-muted); cursor: pointer; padding: 4px;">
+            <button class="delete-history-btn" data-id="${escapeHtml(item.id)}" style="background: none; border: none; color: var(--theme-text-muted); cursor: pointer; padding: 4px;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           `;
@@ -4909,7 +5047,7 @@
         state.lists.forEach(l => {
           const chip = document.createElement('button');
           chip.className = `m3-chip ${l.id === currentEditorListId ? 'active' : ''}`;
-          chip.innerHTML = `<span>${l.name}</span>`;
+          chip.innerHTML = `<span>${escapeHtml(l.name)}</span>`;
           chip.addEventListener('click', () => {
             currentEditorListId = l.id;
             state.activeListId = l.id;
@@ -4954,9 +5092,9 @@
           const coinsFormatted = formatCoinNumber(coins);
           row.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
-              <span class="m3-chip" style="font-size: 10px; padding: 2px 6px; text-transform: uppercase;">${energy}</span>
+              <span class="m3-chip" style="font-size: 10px; padding: 2px 6px; text-transform: uppercase;">${escapeHtml(energy)}</span>
               <span style="font-size: 11px; font-weight: 700; color: var(--theme-gold-text);">+${coinsFormatted}🪙</span>
-              <span style="font-size: 13px; font-weight: 500; color: var(--theme-text); word-break: break-word;">${itemText}</span>
+              <span style="font-size: 13px; font-weight: 500; color: var(--theme-text); word-break: break-word;">${escapeHtml(itemText)}</span>
             </div>
             <button class="delete-item-action" data-idx="${idx}" style="background: none; border: none; color: var(--theme-danger-text); cursor: pointer; padding: 4px;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -5197,19 +5335,19 @@
         if (!accId || accId === 'none') return '';
         const scale = (mascotSizePx || 68) / 68;
         if (accId === 'crown') {
-          return `<svg style="position:absolute; top:${Math.round(-16 * scale)}px; left:50%; transform:translateX(-50%); pointer-events:none; filter:drop-shadow(0 2px 5px rgba(251,191,36,0.65));" width="${Math.round(30 * scale)}" height="${Math.round(22 * scale)}" viewBox="0 0 24 24" fill="#fbbf24" stroke="#78350f" stroke-width="1.5"><path d="M2 18L4 7l5 4 3-6 3 6 5-4 2 11H2z"/></svg>`;
+          return `<svg style="position:absolute; top:${Math.round(-16 * scale)}px; left:50%; transform:translateX(-50%); pointer-events:none;" width="${Math.round(30 * scale)}" height="${Math.round(22 * scale)}" viewBox="0 0 24 24" fill="#fbbf24" stroke="#78350f" stroke-width="1.5"><path d="M2 18L4 7l5 4 3-6 3 6 5-4 2 11H2z"/></svg>`;
         }
         if (accId === 'halo') {
-          return `<svg style="position:absolute; top:${Math.round(-14 * scale)}px; left:50%; transform:translateX(-50%); pointer-events:none; filter:drop-shadow(0 0 6px #fef08a);" width="${Math.round(36 * scale)}" height="${Math.round(14 * scale)}" viewBox="0 0 36 14" fill="none"><ellipse cx="18" cy="7" rx="14" ry="4.2" stroke="#fef08a" stroke-width="2.8"/></svg>`;
+          return `<svg style="position:absolute; top:${Math.round(-14 * scale)}px; left:50%; transform:translateX(-50%); pointer-events:none;" width="${Math.round(36 * scale)}" height="${Math.round(14 * scale)}" viewBox="0 0 36 14" fill="none"><ellipse cx="18" cy="7" rx="14" ry="4.2" stroke="#fef08a" stroke-width="2.8"/></svg>`;
         }
         if (accId === 'wizard') {
-          return `<svg style="position:absolute; top:${Math.round(-22 * scale)}px; left:50%; transform:translateX(-50%); pointer-events:none; filter:drop-shadow(0 2px 6px rgba(139,92,246,0.55));" width="${Math.round(34 * scale)}" height="${Math.round(28 * scale)}" viewBox="0 0 24 24" fill="none"><path d="M12 2L6 16h12L12 2z" fill="#6366f1" stroke="#c084fc" stroke-width="1.4"/><ellipse cx="12" cy="16.5" rx="9" ry="2.2" fill="#4f46e5" stroke="#c084fc" stroke-width="1.2"/><circle cx="12" cy="10" r="1.4" fill="#fef08a"/></svg>`;
+          return `<svg style="position:absolute; top:${Math.round(-22 * scale)}px; left:50%; transform:translateX(-50%); pointer-events:none;" width="${Math.round(34 * scale)}" height="${Math.round(28 * scale)}" viewBox="0 0 24 24" fill="none"><path d="M12 2L6 16h12L12 2z" fill="#6366f1" stroke="#c084fc" stroke-width="1.4"/><ellipse cx="12" cy="16.5" rx="9" ry="2.2" fill="#4f46e5" stroke="#c084fc" stroke-width="1.2"/><circle cx="12" cy="10" r="1.4" fill="#fef08a"/></svg>`;
         }
         if (accId === 'visor') {
-          return `<svg style="position:absolute; top:${Math.round(22 * scale)}px; left:50%; transform:translateX(-50%); pointer-events:none; filter:drop-shadow(0 0 6px #22d3ee);" width="${Math.round(38 * scale)}" height="${Math.round(14 * scale)}" viewBox="0 0 36 14" fill="none"><rect x="3" y="2" width="30" height="9" rx="4.5" fill="rgba(6,182,212,0.42)" stroke="#22d3ee" stroke-width="1.8"/><line x1="8" y1="6.5" x2="28" y2="6.5" stroke="#cffafe" stroke-width="1.3" stroke-linecap="round"/></svg>`;
+          return `<svg style="position:absolute; top:${Math.round(22 * scale)}px; left:50%; transform:translateX(-50%); pointer-events:none;" width="${Math.round(38 * scale)}" height="${Math.round(14 * scale)}" viewBox="0 0 36 14" fill="none"><rect x="3" y="2" width="30" height="9" rx="4.5" fill="rgba(6,182,212,0.42)" stroke="#22d3ee" stroke-width="1.8"/><line x1="8" y1="6.5" x2="28" y2="6.5" stroke="#cffafe" stroke-width="1.3" stroke-linecap="round"/></svg>`;
         }
         if (accId === 'leaf') {
-          return `<svg style="position:absolute; top:${Math.round(-12 * scale)}px; left:56%; transform:translateX(-50%) rotate(12deg); pointer-events:none; filter:drop-shadow(0 2px 4px rgba(34,197,94,0.45));" width="${Math.round(24 * scale)}" height="${Math.round(22 * scale)}" viewBox="0 0 24 24" fill="#22c55e" stroke="#14532d" stroke-width="1.6"><path d="M17 3a7 7 0 0 0-7 7c0 3 2 5 5 5a7 7 0 0 0 7-7c0-3-2-5-5-5z"/><path d="M10 15L5 20" stroke="#22c55e" stroke-width="2" stroke-linecap="round"/></svg>`;
+          return `<svg style="position:absolute; top:${Math.round(-12 * scale)}px; left:56%; transform:translateX(-50%) rotate(12deg); pointer-events:none;" width="${Math.round(24 * scale)}" height="${Math.round(22 * scale)}" viewBox="0 0 24 24" fill="#22c55e" stroke="#14532d" stroke-width="1.6"><path d="M17 3a7 7 0 0 0-7 7c0 3 2 5 5 5a7 7 0 0 0 7-7c0-3-2-5-5-5z"/><path d="M10 15L5 20" stroke="#22c55e" stroke-width="2" stroke-linecap="round"/></svg>`;
         }
         return '';
       }
@@ -5899,11 +6037,77 @@
         });
       });
 
+      /* --- MODAL COMPOSITOR STATE & LIFECYCLE POWER MANAGEMENT --- */
+      function syncModalBodyClass() {
+        const hasOpenModal = document.querySelector('.m3-modal-scrim.open') !== null;
+        document.body.classList.toggle('modal-open', hasOpenModal);
+      }
+
+      if (typeof MutationObserver !== 'undefined') {
+        const modalObserver = new MutationObserver(syncModalBodyClass);
+        document.querySelectorAll('.m3-modal-scrim').forEach(scrim => {
+          modalObserver.observe(scrim, { attributes: true, attributeFilter: ['class'] });
+        });
+      }
+
+      window.__eggDecideOnPause = function() {
+        document.body.classList.add('app-paused');
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+        cancelAudioSuspend();
+        try {
+          if (audioCtx && audioCtx.state === 'running') {
+            const p = audioCtx.suspend();
+            if (p && typeof p.catch === 'function') p.catch(() => {});
+          }
+        } catch (_) {}
+      };
+
+      window.__eggDecideOnResume = function() {
+        document.body.classList.remove('app-paused');
+        syncModalBodyClass();
+        ensureDailyQuestsFresh();
+        updateQuestsAlertDot();
+
+        if (isTimerRunning && !timerInterval) {
+          tickFocusTimer();
+          timerInterval = setInterval(tickFocusTimer, 1000);
+        }
+        if (AmbientSoundPlayer.currentMode !== 'off' && state.soundEnabled) {
+          try {
+            if (audioCtx && audioCtx.state === 'suspended') {
+              const p = audioCtx.resume();
+              if (p && typeof p.catch === 'function') p.catch(() => {});
+            }
+          } catch (_) {}
+        }
+        if (activeReminderTargetMs) {
+          const remaining = activeReminderTargetMs - Date.now();
+          if (remaining <= 0) {
+            fireDueReminder();
+          } else {
+            if (activeReminderTimerId) clearTimeout(activeReminderTimerId);
+            activeReminderTimerId = setTimeout(fireDueReminder, remaining);
+          }
+        }
+      };
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          window.__eggDecideOnPause();
+        } else {
+          window.__eggDecideOnResume();
+        }
+      });
+
       /* --- ANDROID SYSTEM BACK HANDLER --- */
       window.__eggDecideHandleBack = function() {
         const scrims = document.querySelectorAll('.m3-modal-scrim.open');
         if (scrims.length > 0) {
           scrims.forEach(s => s.classList.remove('open', 'shop-entering'));
+          syncModalBodyClass();
           return true;
         }
         if (viewScreens.activeTask.classList.contains('active')) {
